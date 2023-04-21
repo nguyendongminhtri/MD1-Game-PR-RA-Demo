@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        canvas {
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 50px;
+            display: flex;
+        }
+    </style>
+    <script src="model/Rectangle.js"></script>
+    <script src="model/Circle.js"></script>
+</head>
+<body>
+<canvas id="myCanvas" width="800px" height="450px" style="border: solid red"></canvas>
+<script>
+    let myCanvas = document.getElementById('myCanvas');
+    let ctx = myCanvas.getContext('2d');
+    //Lấy dài và rộng khung canvas;
+    let widthCanvas = myCanvas.width;
+    let heightCanvas = myCanvas.height;
+    //Khai báo cho : paddle
+    let widthPaddle = 200;
+    let heightPaddle = 70;
+    let colorPaddle = "blue";
+    let xPaddle = (widthCanvas - widthPaddle) / 2;
+    let yPaddle = heightCanvas - heightPaddle;
+    let paddle = new Rectangle(xPaddle, yPaddle, widthPaddle, heightPaddle, colorPaddle);
+    paddle.drawRect(ctx);
+    //Khai báo cho: ball
+    let radius = 20;
+    let xBall = widthCanvas / 2;
+    let yBall = heightCanvas - heightPaddle - radius;
+    let colorBall = 'yellow';
+    let ball = new Circle(xBall, yBall, radius, colorBall);
+    let dX = 5;
+    let dY = -5;
+    ball.drawCircle(ctx);
+
+    //Khai báo cho: bricks
+
+    let column = 4;
+    let row = 3;
+    let widthBrick = 50;
+    let betweenCenterBrick = 25;
+    let betweenTopDownBrick = 15;
+    let heightBrick = 20;
+    let marginLeftRight = (widthCanvas - column*widthBrick - (column - 1)*betweenCenterBrick)/2
+    let marginTop = 30;
+    let colorBrick = 'red'
+    let xBrick = 0;
+    let yBrick = 0;
+    let arrBricks = [];
+    function createBrick() {
+        for (let i = 0; i < row; i++) {
+            for (let j = 0; j < column; j++) {
+                xBrick = j * (widthBrick + betweenCenterBrick) + marginLeftRight;
+                yBrick = i * (betweenTopDownBrick + heightBrick) + marginTop
+                let brick = new Rectangle(xBrick, yBrick, widthBrick, heightBrick, colorBrick);
+                arrBricks.push(brick);
+                // brick.drawRect(ctx);
+            }
+        }
+    }
+
+    function checkCollisionBallAndBrick() {
+        for (let i = 0; i < arrBricks.length; i++) {
+
+        }
+    }
+
+    //Di chuyển: Paddle
+    function selectKeyboard(evt) {
+        switch (evt.keyCode) {
+            case 37:
+                if (paddle.x < 0) {
+                    return
+                }
+                paddle.moveLeft();
+                break;
+            case 39:
+                if (paddle.x + widthPaddle > widthCanvas) {
+                    return;
+                }
+                paddle.moveRight();
+                break;
+        }
+        clearCanvas();
+        paddle.drawRect(ctx);
+
+    }
+
+    addEventListener('keydown', selectKeyboard)
+
+    //Di chuyển: ball
+    function moveBall() {
+        ball.moveCircle(dX, dY);
+
+        if (ball.x + radius > widthCanvas || ball.x - radius < 0) {
+            dX = -dX;
+        } else if (ball.y - radius < 0) {
+            dY = -dY
+        }
+        checkCollisionBallAndPaddle();
+
+        if(ball.y+radius > heightCanvas){
+            alert('THUA')
+        }
+        requestAnimationFrame(moveBall);
+        clearCanvas();
+        ball.drawCircle(ctx);
+        paddle.drawRect(ctx);
+        createBrick()
+    }
+
+    moveBall();
+
+    //Xóa Khung canvas
+    function clearCanvas() {
+        ctx.clearRect(0, 0, widthCanvas, heightCanvas);
+    }
+
+    //Check va trạm : ball vs paddle
+    function checkCollisionBallAndPaddle() {
+        if (ball.x >= paddle.x && ball.x <= paddle.x + widthPaddle && ball.y + radius == paddle.y) { // check va trạm ở trong khoảng thanh
+            dY = -dY;
+        } else if (ball.x < paddle.x + widthPaddle + radius && ball.y > paddle.y - radius // check va trạm ở 2 góc của thanh
+            && ball.y < paddle.y &&ball.x > paddle.x - radius) {
+            dX = -dX;
+            dY = - dY;
+        } else if((ball.x - radius <= paddle.x + widthPaddle || ball.x + radius >= paddle.x) && ball.y > paddle.y +radius ){
+            dX = -dX; //Check va trạm khi bóng trong thanh nhưng không đỡ được vì vượt quá giới hạn dưới
+        }
+    }
+    //Check va trạm: ball vs brick
+    function checkCollisionBallAndBrick() {
+
+    }
+</script>
+</body>
+</html>
